@@ -1,20 +1,27 @@
 class Post < ActiveRecord::Base
 
     validates :title, presence: true
-    # validates :content, length: { minimum: 250 }
+    validates :content, length: { minimum: 250 }
     validates :summary, length: { maximum: 250 }, allow_nil: true
      validates :category, inclusion: { in: ["Fiction", "Non-Fiction"]}
 
 
+     validate :is_clickbait?
 
-
-validate :content,
-
-    def content(clickbait)
-     clickbait = "Won't Believe"||"Secret"||"Top [number]"||"Guess"
-     if clickbait.present? && content.length < 250
-     else  errors.add(:content, "must contain clickbait Won't Believe, Secret,Top [number], or Guess")
-
-     end    
+     
+     CLICKBAIT_PATTERNS = [
+       /Won't Believe/i,
+       /Secret/i,
+       /Top [0-9]*/i,
+       /Guess/i
+     ]
+   
+     def is_clickbait?
+       if CLICKBAIT_PATTERNS.none? { |pat| pat.match title }# true if none of the strings match the condition
+         errors.add(:title, "must be clickbait")
+     end
     end
+
+
 end
+
